@@ -47,12 +47,12 @@ func (this *TicketResp) Decode() ([]*Ticket, error) {
 				"商务座": list[32],
 				"一等座": list[31],
 				"二等座": list[30],
-				"软卧":   list[23],
-				"硬卧":   list[28],
-				"动卧":   list[33],
-				"软座":   list[24],
-				"硬座":   list[29],
-				"无座":   list[26],
+				"软卧":  list[23],
+				"硬卧":  list[28],
+				"动卧":  list[33],
+				"软座":  list[24],
+				"硬座":  list[29],
+				"无座":  list[26],
 			},
 		})
 	}

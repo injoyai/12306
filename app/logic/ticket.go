@@ -13,8 +13,7 @@ func GetTicketList(date time.Time, from, to string) ([]*model.Ticket, error) {
 	//请求地址
 	u := "https://kyfw.12306.cn/otn/leftTicket/query"
 	//query的参数有顺序要求,否则会请求失败
-	u = fmt.Sprintf("%s?leftTicketDTO.train_date=%s&leftTicketDTO.from_station=%s&leftTicketDTO.to_station=%s&purpose_codes=ADULT",
-		u,
+	u += fmt.Sprintf("?leftTicketDTO.train_date=%s&leftTicketDTO.from_station=%s&leftTicketDTO.to_station=%s&purpose_codes=ADULT",
 		date.Format("2006-01-02"),
 		from,
 		to,

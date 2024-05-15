@@ -8,8 +8,7 @@ import "github.com/injoyai/goutil/notice"
 
 */
 
-type _notice struct {
-}
+type _notice struct{}
 
 func (this *_notice) Popup(msg string) error {
 	return notice.DefaultWindows.Publish(&notice.Message{

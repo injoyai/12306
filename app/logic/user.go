@@ -3,8 +3,8 @@ package logic
 import (
 	"encoding/base64"
 	"errors"
+	"github.com/injoyai/base/g"
 	"github.com/injoyai/goutil/net/http"
-	"strings"
 )
 
 /*
@@ -16,22 +16,11 @@ import (
 var User = &user{}
 
 type user struct {
-	Cookies []*http.Cookie
+	Cookies
 }
 
 func (this *user) url(url string) *http.Request {
 	return http.Url(url).AddCookie(this.Cookies...)
-}
-
-// decodeCookie 解析cookie,测试用
-func (this *user) decodeCookie(s string) []*http.Cookie {
-	cookies := []*http.Cookie(nil)
-	for _, v := range strings.Split(s, ";") {
-		if list := strings.SplitN(v, "=", 2); len(list) == 2 {
-			cookies = append(cookies, &http.Cookie{Name: list[0], Value: list[1]})
-		}
-	}
-	return cookies
 }
 
 // Check 判断是否登录
@@ -47,8 +36,8 @@ func (this *user) Check() (bool, error) {
 // Login 登录操作
 func (this *user) Login() ([]*http.Cookie, error) { return nil, nil }
 
-// ByQR 二维码登录
-func (this *user) ByQR() ([]*http.Cookie, error) { return nil, nil }
+// LoginByQR 二维码登录
+func (this *user) LoginByQR() ([]*http.Cookie, error) { return nil, nil }
 
 // QR 获取登录二维码
 func (this *user) QR() ([]byte, error) {
@@ -69,6 +58,31 @@ func (this *user) QR() ([]byte, error) {
 	return base64.StdEncoding.DecodeString(res.Image)
 }
 
+// CheckLoginByQR 校验二维码登录是否成功,返回是否登录成功,是否过期,和错误信息
+func (this *user) CheckLoginByQR(uuid string) (succ, overdue bool, err error) {
+	url := "https://kyfw.12306.cn/passport/web/checkqr"
+	resp := this.url(url).SetQuerys(g.M{
+		"appid": "otn",
+		"uuid":  uuid,
+	}).Get()
+	if resp.Err() != nil {
+		return false, false, nil
+	}
+	m := resp.GetBodyDMap()
+	code := m.GetString("result_code")
+	msg := m.GetString("result_message")
+	switch code {
+	case "0":
+		return false, false, nil
+	case "2":
+		return true, false, nil
+	case "3":
+		return false, true, nil
+	default:
+		return false, false, errors.New(msg)
+	}
+}
+
 // Info 用户信息
 func (this *user) Info() {
 
@@ -76,7 +90,11 @@ func (this *user) Info() {
 
 // Logout 退出登录
 func (this *user) Logout() error {
-
+	url := "https://kyfw.12306.cn/otn/login/loginOut"
+	resp := http.Url(url).SetHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8").Get()
+	if resp.Err() != nil {
+		return resp.Err()
+	}
 	this.Cookies = nil
 	return nil
 }

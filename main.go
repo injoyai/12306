@@ -1,5 +1,11 @@
 package main
 
+import (
+	"github.com/injoyai/conv/cfg"
+	"github.com/injoyai/conv/codec"
+	"github.com/injoyai/logs"
+)
+
 func main() {
 
 	/*
@@ -21,5 +27,8 @@ func main() {
 		也就是说，想要抢到新一天的车票，你需要在早上八点准时登录12306网站或手机APP进行查询和购买。
 
 	*/
+
+	cfg.Default = cfg.New("./config/config.yaml", codec.Yaml)
+	logs.Debug(cfg.GetString("test.cookieStr"))
 
 }

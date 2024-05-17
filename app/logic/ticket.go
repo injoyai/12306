@@ -14,7 +14,7 @@ import (
 )
 
 // GetTicketList 查询车票信息
-func GetTicketList(date time.Time, from, to string) (_ []*model.Ticket, err error) {
+func GetTicketList(date time.Time, from, to string) (_ model.Tickets, err error) {
 
 	//校验日期
 	if err = CheckDate(date); err != nil {
@@ -46,7 +46,7 @@ func GetTicketList(date time.Time, from, to string) (_ []*model.Ticket, err erro
 		SetHeader("Cookie", "RAIL_DEVICEID=;").
 		SetHeader("Accept-Language", "en").
 		//Bind(result).
-		Debug().
+		//Debug().
 		Get()
 
 	if resp.Err() != nil {

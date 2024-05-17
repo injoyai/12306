@@ -3,6 +3,7 @@ package model
 import (
 	"errors"
 	"fmt"
+	"github.com/injoyai/conv"
 	"strings"
 )
 
@@ -93,4 +94,22 @@ func (this *Ticket) String() string {
 		this.SeatType,
 		//this.FromStation, this.FromStationName, this.ToStation, this.ToStationName,
 	)
+}
+
+type Tickets []*Ticket
+
+func (this Tickets) String() string {
+	var s string
+	for i, v := range this {
+		s += conv.String(i+1) + ". " + v.String() + "\n"
+	}
+	return s
+}
+
+func (this Tickets) TrainNoMap() map[int]string {
+	m := make(map[int]string)
+	for i, v := range this {
+		m[i+1] = v.TrainNo
+	}
+	return m
 }

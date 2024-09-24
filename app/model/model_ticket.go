@@ -3,6 +3,7 @@ package model
 import (
 	"errors"
 	"fmt"
+	"github.com/injoyai/conv"
 	"strings"
 )
 
@@ -26,17 +27,34 @@ func (this *TicketResp) Decode() ([]*Ticket, error) {
 		if len(list) <= 37 {
 			return nil, errors.New("解析车票信息失败")
 		}
+
 		result = append(result, &Ticket{
-			Secret:          list[0],
-			Status:          list[1],
-			TrainName:       list[2],
-			TrainNo:         list[3],
-			TrainStartTime:  list[8],
-			TrainEndTime:    list[9],
+			Secret:         list[0],
+			Status:         list[1],
+			TrainName:      list[2],
+			TrainNo:        list[3],
+			TrainStartTime: list[8],
+			TrainEndTime:   list[9],
+			TrainSpendTime: list[10],
+
 			FromStation:     list[6],
 			FromStationName: this.Map[list[6]],
 			ToStation:       list[7],
 			ToStationName:   this.Map[list[7]],
+
+			Alternate: list[37],
+			SeatType: map[string]string{
+				"特等座": list[25],
+				"商务座": list[32],
+				"一等座": list[31],
+				"二等座": list[30],
+				"软卧":  list[23],
+				"硬卧":  list[28],
+				"动卧":  list[33],
+				"软座":  list[24],
+				"硬座":  list[29],
+				"无座":  list[26],
+			},
 		})
 	}
 	return result, nil
@@ -45,45 +63,53 @@ func (this *TicketResp) Decode() ([]*Ticket, error) {
 // Ticket 车票信息
 type Ticket struct {
 	Secret         string `json:"secret"`
-	Status         string `json:"status"`
-	TrainName      string `json:"trainName"` //列车名称
-	TrainNo        string `json:"trainNo"`   //车次
-	TrainStartTime string `json:"trainStartTime"`
-	TrainEndTime   string `json:"trainEndTime"`
+	Status         string `json:"status"`         //状态
+	TrainName      string `json:"trainName"`      //列车名称
+	TrainNo        string `json:"trainNo"`        //车次
+	TrainStartTime string `json:"trainStartTime"` //出发时间
+	TrainEndTime   string `json:"trainEndTime"`   //到达时间
+	TrainSpendTime string `json:"trainSpendTime"` //总耗时时间
 
-	FromStation     string `json:"fromStation"`
-	FromStationName string `json:"fromStationName"`
-	ToStation       string `json:"toStation"`
-	ToStationName   string `json:"toStationName"`
+	FromStation     string `json:"fromStation"`     //起始站
+	FromStationName string `json:"fromStationName"` //起始站名称
+	ToStation       string `json:"toStation"`       //终点站
+	ToStationName   string `json:"toStationName"`   //终点站名称
+
+	Alternate string            `json:"alternate"` //候补
+	SeatType  map[string]string `json:"seatType"`  //座位类型,一等座,二等座...
 
 	/*
-		if resSlice[1] == "预订" {
-			sd.SecretStr = resSlice[0]
-			sd.LeftTicket = resSlice[29]
-			sd.StartTime = resSlice[8]
-			sd.ArrivalTime = resSlice[9]
-			sd.DistanceTime = resSlice[10]
-			sd.IsCanNate = resSlice[37]
-
-			sd.SeatInfo = make(map[string]string)
-			sd.SeatInfo["特等座"] = resSlice[utils.SeatType["特等座"]]
-			sd.SeatInfo["商务座"] = resSlice[utils.SeatType["商务座"]]
-			sd.SeatInfo["一等座"] = resSlice[utils.SeatType["一等座"]]
-			sd.SeatInfo["二等座"] = resSlice[utils.SeatType["二等座"]]
-			sd.SeatInfo["软卧"] = resSlice[utils.SeatType["软卧"]]
-			sd.SeatInfo["硬卧"] = resSlice[utils.SeatType["硬卧"]]
-			sd.SeatInfo["硬座"] = resSlice[utils.SeatType["硬座"]]
-			sd.SeatInfo["无座"] = resSlice[utils.SeatType["无座"]]
-			sd.SeatInfo["动卧"] = resSlice[utils.SeatType["动卧"]]
-			sd.SeatInfo["软座"] = resSlice[utils.SeatType["软座"]]
-		}
+		sd.LeftTicket = resSlice[29]
+		sd.IsCanNate = resSlice[37]
 	*/
 
 }
 
 func (this *Ticket) String() string {
-	return fmt.Sprintf("状态: %s, 车次: %s,时间: %s-%s, 出发站: %s(%s), 到达站: %s(%s)",
+	return fmt.Sprintf("状态: %s, 车次: %s, 站点: %s-%s, 时间: %s-%s, %s, %v",
 		this.Status, this.TrainNo,
+		this.FromStationName, this.ToStationName,
 		this.TrainStartTime, this.TrainEndTime,
-		this.FromStation, this.FromStationName, this.ToStation, this.ToStationName)
+		this.TrainSpendTime,
+		this.SeatType,
+		//this.FromStation, this.FromStationName, this.ToStation, this.ToStationName,
+	)
+}
+
+type Tickets []*Ticket
+
+func (this Tickets) String() string {
+	var s string
+	for i, v := range this {
+		s += conv.String(i+1) + ". " + v.String() + "\n"
+	}
+	return s
+}
+
+func (this Tickets) TrainNoMap() map[int]string {
+	m := make(map[int]string)
+	for i, v := range this {
+		m[i+1] = v.TrainNo
+	}
+	return m
 }

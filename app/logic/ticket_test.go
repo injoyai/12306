@@ -6,7 +6,13 @@ import (
 )
 
 func TestGetTicketList(t *testing.T) {
-	list, err := GetTicketList(time.Date(2024, 5, 1, 0, 0, 0, 0, time.Local), "WEI", "EAY")
+	/*
+		WEI 成都东
+		EAY 西安北
+		HGH 杭州东
+		VRH 温州南
+	*/
+	list, err := GetTicketList(time.Date(2024, 5, 17, 0, 0, 0, 0, time.Local), "HGH", "VRH")
 	if err != nil {
 		t.Error(err)
 		return
